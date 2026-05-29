@@ -24,9 +24,6 @@ if hasattr(sys.stdout, "reconfigure"):
 if hasattr(sys.stderr, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8")
 
-from google import genai
-from google.genai import types
-
 GEMINI_MODEL = "gemini-3.1-flash-lite"
 
 SYSTEM_PROMPT = """
@@ -130,17 +127,24 @@ def evaluate_prompt(user_input: str) -> str:
     if not api_key:
         return _offline_boundary_response(user_input)
 
-    client = genai.Client(api_key=api_key)
-    response = client.models.generate_content(
-        model=GEMINI_MODEL,
-        contents=user_input,
-        config=types.GenerateContentConfig(
-            system_instruction=SYSTEM_PROMPT,
-            temperature=0.2,
-            response_mime_type="application/json",
-        ),
-    )
-    return _extract_text(response)
+    try:
+        from google import genai
+        from google.genai import types
+
+        client = genai.Client(api_key=api_key)
+        response = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=user_input,
+            config=types.GenerateContentConfig(
+                system_instruction=SYSTEM_PROMPT,
+                temperature=0.2,
+                response_mime_type="application/json",
+            ),
+        )
+        return _extract_text(response)
+    except Exception as error:
+        print(f"[WARN] Gemini SDK/API unavailable, using offline fallback: {error}")
+        return _offline_boundary_response(user_input)
 
 
 ADVERSARIAL_TESTS = [
