@@ -1,127 +1,130 @@
-# 02 — Deep-Dive Report: Vinhomes Ticket Routing Copilot
+# 02 — Deep-Dive Report: Vinhomes Interior Renovation Assistant
 
 ## Thông tin nhóm
 
 | Mục | Nội dung |
 |---|---|
-| **Tên nhóm** | Khoa |
-| **Thành viên** | Khoa / vkhoa2110 |
+| **Tên nhóm** | UETE |
+| **Thành viên** | Trần Trung Kiên — 2a202600850<br>Lê Văn Khoa — 2a202600603<br>Lê Quang Hưng — 2a202600891<br>Nguyễn Văn Duy — 2a202600725 |
 | **Công ty thành viên chọn phân tích** | Vinhomes |
 
 ## Quyết định lựa chọn
 
-Nhóm chọn bài toán **Vinhomes phân loại và route ticket cư dân trên App Vinhomes Resident** để thực hiện deep-dive.
+Nhóm chọn bài toán **Vinhomes - Trợ lý cư dân ảo hỗ trợ đăng ký thi công nội thất** để thực hiện deep-dive.
 
 Lý do chọn:
-- Tác vụ xuất hiện hằng ngày, có nhiều nội dung tiếng Việt tự do, phù hợp để LLM tóm tắt và phân loại.
-- Rủi ro có thể kiểm soát bằng Human-in-the-loop: AI chỉ tạo nháp, nhân viên CSKH duyệt trước khi gửi hoặc route.
-- Metric rõ: thời gian phản hồi đầu tiên, tỉ lệ route đúng, tỉ lệ ticket trễ SLA.
+- Đây là thủ tục hành chính phổ biến ở các khu căn hộ, nhiều cư dân hỏi lặp lại về giấy tờ, quy định thi công, khung giờ làm việc, đặt cọc và hồ sơ cần chuẩn bị.
+- Ban quản lý phải tra quy định nội bộ, giải thích từng trường hợp, gửi checklist, kiểm tra hồ sơ thiếu/sai và yêu cầu cư dân bổ sung nhiều lần.
+- AI có thể hỗ trợ tốt ở phần tra cứu quy định, hỏi thông tin còn thiếu và draft checklist/hướng dẫn, nhưng quyết định duyệt thi công vẫn bắt buộc do ban quản lý thực hiện.
 
-Không chọn Vinmec vì dữ liệu y tế nhạy cảm và yêu cầu kiểm định an toàn cao hơn. Không chọn VinFast vì triage kỹ thuật xe có rủi ro an toàn, cần dữ liệu mã lỗi và quy trình xưởng chuẩn hóa trước.
+Nhóm thu hẹp scope vào **hướng dẫn và kiểm tra hồ sơ đăng ký thi công nội thất trước khi duyệt**, không tự động cấp phép thi công. Scope này đủ rõ để làm prototype và có ranh giới vận hành an toàn.
 
 ## 3.1. Current-State Workflow
 
-Quy trình hiện tại khi cư dân gửi phản ánh lên App Vinhomes Resident:
+Quy trình hiện tại khi cư dân Vinhomes muốn đăng ký thi công nội thất:
 
 ```text
-1. Cư dân gửi ticket trên app
-   Input: mô tả tự do, ảnh/video, tòa/căn hộ
-   Output: ticket mới
-   Thời gian: 1 phút
-   Handoff: Cư dân -> hệ thống app -> CSKH
+1. Cư dân hỏi thủ tục qua app/quầy
+   Input: câu hỏi tự do về thi công nội thất
+   Output: yêu cầu tư vấn ban đầu
+   Thời gian: 2 phút
+   Handoff: Cư dân -> App/quầy -> Ban quản lý
 
-2. Nhân viên CSKH đọc và hiểu nội dung
-   Input: ticket thô
-   Output: tóm tắt vấn đề
-   Thời gian: 4 phút
-
-3. CSKH phân loại nhóm vấn đề và mức ưu tiên
-   Ví dụ: thang máy, nước, điện, an ninh, vệ sinh, phí, tiếng ồn
-   Output: category + priority
+2. Nhân viên ban quản lý tra cứu quy định nội bộ
+   Input: tòa/căn hộ, loại hạng mục thi công, thời gian dự kiến
+   Output: mục liên quan trong quy định thi công
    Thời gian: 5 phút
-   Bottleneck: dễ sai khi ticket có nhiều ý hoặc mô tả thiếu rõ ràng
+   Bottleneck: quy định có nhiều điều kiện theo tòa/khu và loại hạng mục
 
-4. CSKH tra quy định/SLA và gán bộ phận xử lý
-   Output: bộ phận nhận việc + deadline
-   Thời gian: 4 phút
-   Handoff: CSKH -> kỹ thuật/an ninh/vệ sinh/kế toán phí
+3. Nhân viên ban quản lý giải thích giấy tờ cần chuẩn bị
+   Input: case cụ thể của cư dân
+   Output: checklist giấy tờ, bản vẽ, cam kết, đặt cọc, thời gian được thi công
+   Thời gian: 8 phút
+   Bottleneck: phải cá nhân hóa hướng dẫn và dễ thiếu mục bắt buộc
 
-5. CSKH soạn phản hồi đầu tiên cho cư dân
-   Output: tin nhắn xác nhận đã tiếp nhận + thời gian dự kiến
-   Thời gian: 5 phút
-   Bottleneck: phản hồi dễ rập khuôn hoặc thiếu thông tin SLA
+4. Cư dân chuẩn bị hồ sơ và nộp lại
+   Input: checklist từ ban quản lý
+   Output: bộ hồ sơ thi công
+   Thời gian chờ: 1-2 ngày
+   Handoff: Cư dân -> Ban quản lý
 
-6. Bộ phận xử lý cập nhật trạng thái
-   Output: trạng thái xử lý cho cư dân
-   Thời gian CSKH theo dõi: 1-2 phút/ticket
+5. Ban quản lý kiểm tra hồ sơ, yêu cầu bổ sung nếu thiếu
+   Input: hồ sơ cư dân nộp
+   Output: hồ sơ đủ điều kiện/chờ bổ sung
+   Thời gian: 10 phút
+   Bottleneck: phải đối chiếu nhiều trường và phát hiện thiếu/sai giấy tờ
 ```
 
-**Tổng thời gian xử lý thủ công trước phản hồi đầu tiên: khoảng 18-20 phút/ticket.**
+**Tổng thời gian thao tác thủ công của ban quản lý: khoảng 25 phút/hồ sơ, chưa tính 1-2 ngày cư dân chuẩn bị và bổ sung hồ sơ.**
 
 ## 3.2. Problem Statement (6-field)
 
 | Field | Nội dung |
 |---|---|
-| **1. Actor / Operator** | Nhân viên CSKH/Ban quản lý tòa nhà Vinhomes, người đọc ticket cư dân và route cho các bộ phận vận hành. |
-| **2. Current Workflow** | Cư dân gửi ticket tự do qua app. CSKH đọc mô tả, xem ảnh/video, tự phân loại nhóm vấn đề, tra SLA/quy định nội bộ, gán bộ phận xử lý và viết phản hồi đầu tiên. Quy trình dùng app cư dân, dashboard ticket và tài liệu quy định nội bộ, mất khoảng 18-20 phút/ticket. |
-| **3. Bottleneck** | Bước 3-5: phân loại đúng category, xác định mức ưu tiên, route đúng bộ phận và soạn phản hồi phù hợp. Đây là phần cần hiểu ngôn ngữ tự nhiên và bối cảnh tòa nhà nên rule cứng không đủ linh hoạt. |
-| **4. Business Impact** | Nếu mỗi ngày có khoảng 300 ticket/cụm đô thị, phần đọc-route-phản hồi có thể tiêu tốn 90-100 giờ công/ngày. Route sai làm tăng handoff lại, cư dân phải nhắc nhiều lần, ảnh hưởng SLA và điểm hài lòng cư dân. |
-| **5. Success Metric** | 1. Giảm thời gian phản hồi đầu tiên từ 18 phút xuống dưới 3 phút/ticket. 2. >=90% ticket được phân loại đúng ngay lần đầu. 3. Giảm ticket bị route lại do sai bộ phận xuống dưới 8%. 4. 95% ticket thường có phản hồi đầu tiên dưới 30 phút. |
-| **6. Operational Boundary** | AI được phép tóm tắt ticket, đề xuất category/priority, đề xuất bộ phận xử lý và soạn phản hồi dạng nháp. AI không được tự gửi phản hồi, không được hứa bồi thường/miễn phí, không được kết luận lỗi pháp lý, không được tự đóng ticket. Ticket liên quan an ninh, tai nạn, cháy nổ, tranh chấp phí hoặc đe dọa an toàn phải chuyển nhân viên trực phê duyệt ngay. |
+| **1. Actor / Operator** | Nhân viên CSKH/Ban quản lý tòa nhà Vinhomes phụ trách hướng dẫn cư dân đăng ký thi công nội thất và kiểm tra hồ sơ trước khi trình duyệt. |
+| **2. Current Workflow** | Cư dân hỏi thủ tục qua app/quầy. Nhân viên ban quản lý tra quy định nội bộ, giải thích giấy tờ cần chuẩn bị, gửi checklist, nhận hồ sơ, kiểm tra các trường bắt buộc và yêu cầu bổ sung nếu thiếu. Quy trình dùng app/quầy tiếp nhận, file quy định nội bộ, mẫu checklist và dashboard hồ sơ cư dân. |
+| **3. Bottleneck** | Bước 3 và 5: giải thích đúng checklist theo case cụ thể và kiểm tra hồ sơ thiếu/sai. Hai bước này mất khoảng 18 phút/hồ sơ, dễ gây vòng lặp bổ sung vì cư dân không biết rõ cần chuẩn bị bản vẽ, cam kết, đặt cọc hay giấy tờ nhà thầu nào. |
+| **4. Business Impact** | Nếu một cụm tòa có khoảng 50 hồ sơ thi công/tháng, ban quản lý mất hơn 20 giờ công/tháng chỉ cho hướng dẫn và kiểm tra lặp lại. Hồ sơ thiếu làm kéo dài thời gian duyệt, tăng số lượt trao đổi, gây bức xúc cho cư dân và làm quá tải quầy CSKH vào các giai đoạn bàn giao căn hộ. |
+| **5. Success Metric** | 1. Giảm thời gian hướng dẫn + kiểm tra hồ sơ từ 25 phút xuống dưới 5 phút/hồ sơ. 2. Tăng tỉ lệ hồ sơ đủ thông tin ngay lần đầu từ 55% lên >=85%. 3. Giảm số lượt cư dân phải hỏi lại/bổ sung hồ sơ ít nhất 40%. 4. 95% yêu cầu thường có phản hồi đầu tiên dưới 10 phút. |
+| **6. Operational Boundary** | AI được phép tra cứu quy định đã duyệt, hỏi cư dân thông tin còn thiếu, tạo checklist cá nhân hóa, draft hướng dẫn và draft form/hồ sơ cho nhân viên duyệt. AI không được tự phê duyệt thi công, không được cho phép thi công ngoài giờ, không được bỏ qua đặt cọc/cam kết, không được miễn/giảm phí phạt, không được tư vấn thay đổi kết cấu chịu lực hoặc hạng mục có rủi ro an toàn. Mọi kết quả cuối cùng phải có nhân viên ban quản lý duyệt. |
 
 ## 3.3. Future-State Flow & AI Fit
 
-**AI Fit:** Chọn **LLM Feature kết hợp Rule/State-Machine**.
+**AI Fit:** Chọn **LLM Feature + Rule/RAG validation**.
 
 | Lựa chọn | Đánh giá |
 |---|---|
-| **No AI** | Không giải quyết được bottleneck đọc hiểu tiếng Việt tự do; CSKH vẫn mất nhiều thời gian. |
-| **Rule / State-Machine** | Phù hợp để bắt keyword khẩn cấp, map category rõ ràng và kiểm tra SLA, nhưng yếu khi cư dân mô tả mơ hồ hoặc một ticket có nhiều ý. |
-| **LLM Feature** | Phù hợp nhất cho MVP: tóm tắt, phân loại intent, phát hiện thông tin thiếu, draft phản hồi. |
-| **Agentic Loop** | Chưa cần cho MVP vì tự động route/gửi/đóng ticket có rủi ro vận hành; nên để con người duyệt. |
+| **No AI** | Không giảm được lượng câu hỏi lặp lại và vòng lặp hồ sơ thiếu thông tin. |
+| **Rule / State-Machine** | Hữu ích để kiểm tra trường bắt buộc như căn hộ, loại hạng mục, thời gian thi công, giấy cam kết, đặt cọc. Tuy nhiên rule cứng không đủ linh hoạt khi cư dân hỏi bằng ngôn ngữ tự nhiên. |
+| **LLM Feature** | Phù hợp nhất cho MVP: hiểu câu hỏi tiếng Việt, tra knowledge base, hỏi thông tin thiếu, draft checklist và hướng dẫn. |
+| **Agentic Loop** | Chưa phù hợp ở MVP vì tự động duyệt hồ sơ thi công có rủi ro vận hành, an toàn tòa nhà và trách nhiệm pháp lý. |
 
 Future-state flow:
 
 ```text
-1. Cư dân gửi ticket
-   -> App ghi nhận nội dung, ảnh/video, tòa/căn hộ
+1. Cư dân nhập câu hỏi trên app/quầy
+   -> App ghi nhận tòa/căn hộ, hạng mục thi công, thời gian dự kiến
 
-2. Rule pre-check
-   -> Nếu có keyword khẩn cấp: cháy, tai nạn, mất an ninh, kẹt thang máy
-   -> Gắn nhãn URGENT và đẩy nhân viên trực
+2. AI Step: LLM tóm tắt nhu cầu và hỏi thông tin còn thiếu
+   -> Loại hạng mục
+   -> Thời gian thi công
+   -> Nhà thầu
+   -> Bản vẽ/hồ sơ hiện có
 
-3. AI Step: LLM tóm tắt và phân loại
-   -> summary
-   -> category
-   -> priority
-   -> missing_info
-   -> suggested_team
-   -> draft_reply
+3. AI Step: Tra cứu quy định đã được duyệt
+   -> Knowledge base quy định thi công nội thất Vinhomes
+   -> Rule check cho hạng mục nhạy cảm, ngoài giờ, ảnh hưởng kết cấu
 
-4. Human Step (HITL): CSKH review
-   -> Duyệt/sửa category, priority, team, draft_reply
-   -> Không cho phép gửi nếu chưa có người duyệt
+4. AI Step: Draft checklist hồ sơ cần nộp
+   -> Danh sách giấy tờ
+   -> Mẫu cam kết
+   -> Lưu ý đặt cọc/phí
+   -> Khung giờ thi công hợp lệ
 
-5. Hệ thống route ticket
-   -> Gửi sang kỹ thuật/an ninh/vệ sinh/kế toán phí
-   -> Gửi phản hồi đầu tiên cho cư dân sau khi CSKH duyệt
+5. Human Step (HITL): Nhân viên ban quản lý duyệt/chỉnh sửa draft
+   -> Xác nhận quy định áp dụng
+   -> Kiểm tra rủi ro an toàn
+   -> Không cho phép AI tự phê duyệt
 
-6. Fallback
-   -> Nếu AI confidence thấp, thiếu dữ liệu, hoặc output sai format
-   -> Ticket quay về workflow thủ công và được gắn nhãn "manual_review"
+6. Gửi hướng dẫn chính thức cho cư dân
+   -> Cư dân nhận checklist đã duyệt và nộp hồ sơ đầy đủ hơn
+
+Fallback
+   -> Nếu AI không tự tin, không tìm thấy quy định, hạng mục nhạy cảm hoặc có tranh chấp
+   -> Chuyển manual_review cho ban quản lý xử lý thủ công
 ```
 
 ## Phase 5 — EVALUATE
 
 ### AI Readiness Checklist
 
-1. [x] Có dữ liệu mẫu/logs để test: ticket cư dân cũ, category đã xử lý, lịch sử route và thời gian SLA.
-2. [x] Rủi ro khi AI sai nằm trong tầm kiểm soát: AI chỉ draft; CSKH duyệt trước khi gửi/route.
-3. [x] Stakeholders có động lực thay đổi: CSKH giảm thời gian đọc-route, cư dân nhận phản hồi nhanh hơn, ban quản lý giảm ticket trễ SLA.
+1. [x] Có dữ liệu mẫu/logs để test: FAQ cư dân, quy định thi công nội thất, mẫu checklist, mẫu cam kết, lịch sử hồ sơ thiếu/sai.
+2. [x] Rủi ro khi AI sai nằm trong tầm kiểm soát: AI chỉ draft checklist/hướng dẫn; ban quản lý duyệt trước khi gửi kết quả cuối cùng.
+3. [x] Stakeholders có động lực thay đổi: cư dân muốn biết thủ tục nhanh, ban quản lý muốn giảm câu hỏi lặp lại và giảm hồ sơ thiếu thông tin.
 
 ### Quyết định cuối cùng
 
-[x] **GO (Bắt đầu xây dựng Prototype):** bắt đầu với scope hẹp cho 5 nhóm ticket phổ biến: thang máy, nước, điện, vệ sinh, an ninh.
+[x] **GO (Bắt đầu xây dựng Prototype):** bắt đầu với scope hẹp cho hướng dẫn hồ sơ đăng ký thi công nội thất tại một cụm tòa.
 
 [ ] **NOT YET:** cần thêm dữ liệu/xác lập baseline.
 
@@ -129,15 +132,16 @@ Future-state flow:
 
 ### Justification
 
-Nên GO với MVP có phạm vi hẹp vì bài toán có dữ liệu lịch sử, metric rõ và rủi ro kiểm soát được bằng HITL. LLM không được thay thế nhân viên CSKH mà chỉ giảm thời gian đọc hiểu, phân loại và soạn nháp.
+Nên GO với MVP phạm vi hẹp vì bài toán có quy trình rõ, dữ liệu có thể chuẩn hóa và rủi ro kiểm soát được bằng HITL. AI không thay ban quản lý phê duyệt thi công, chỉ hỗ trợ tra cứu, hỏi thông tin thiếu và soạn nháp checklist/hướng dẫn.
 
 Ước lượng chi phí kỹ thuật ban đầu:
-- 1-2 tuần để gom 500-1.000 ticket mẫu và chuẩn hóa nhãn category/priority.
-- 2-3 tuần xây prototype API: nhận ticket, gọi LLM, trả JSON, ghi log đánh giá.
-- 1 tuần UAT với CSKH tại một cụm tòa.
-- Chi phí inference có thể kiểm soát vì mỗi ticket ngắn; ưu tiên batch evaluation offline trước khi bật real-time.
+- 1 tuần gom và chuẩn hóa knowledge base: quy định thi công, checklist giấy tờ, mẫu cam kết, quy định đặt cọc/phí.
+- 1-2 tuần xây prototype: API nhận câu hỏi/hồ sơ, truy xuất quy định, gọi LLM trả JSON draft.
+- 1 tuần UAT với ban quản lý tại một cụm tòa và đo baseline.
+- Chi phí inference thấp vì mỗi case ngắn; ưu tiên log đầy đủ để đánh giá lỗi trước khi mở rộng.
 
 Điều kiện GO:
-- Không gửi tự động khi chưa có CSKH duyệt.
-- Lưu đủ log input/output/decision để audit.
-- Nếu confidence thấp hơn 0.75 hoặc ticket thuộc nhóm nhạy cảm, hệ thống bắt buộc chuyển manual review.
+- Không tự động duyệt hồ sơ thi công.
+- Không cho phép thi công ngoài khung giờ/quy định đã duyệt.
+- Không bỏ qua đặt cọc, cam kết hoặc phí phạt.
+- Nếu confidence thấp hơn 0.75, không tìm thấy quy định hoặc hạng mục ảnh hưởng an toàn/kết cấu, bắt buộc chuyển manual review.

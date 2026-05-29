@@ -4,27 +4,27 @@
 
 | # | Subsidiary (VinFast/Xanh SM...) | Lens | Mô tả ngắn bài toán |
 |---|----------------------------------|------|---------------------|
-| 1 | **VinFast** | Tốn thời gian | Cố vấn dịch vụ đọc mô tả lỗi xe điện, ảnh/video khách gửi và log app để phân loại lỗi pin/ADAS/điện trước khi đặt lịch sửa chữa; mất khoảng 15-20 phút/case. |
-| 2 | **Xanh SM (GSM)** | Stakeholder Pain | Tài xế phản ánh điểm đón/trả trên bản đồ không khớp thực tế; điều phối viên phải gọi lại khách, hỏi mốc địa lý và chỉnh thủ công trong giờ cao điểm. |
-| 3 | **Vinhomes** | AI-upgrade | Phân loại và route ticket cư dân trên App Vinhomes Resident (thang máy, nước, phí, an ninh, vệ sinh) hiện còn đọc tay và phản hồi mẫu, dễ trễ SLA. |
-| 4 | **Vinmec** | Tốn thời gian | Bác sĩ/điều dưỡng phải tổng hợp kết quả xét nghiệm, chẩn đoán, thuốc và dặn dò để viết tóm tắt ra viện/tái khám sau mỗi ca khám. |
-| 5 | **Vinpearl / VinWonders** | Lặp lại | Nhân viên CSKH xử lý yêu cầu đổi ngày vé/phòng/combo do thời tiết hoặc lịch bay bằng cách kiểm tra nhiều hệ thống rồi soạn phản hồi gần giống nhau. |
+| 1 | **VinFast** | Tốn thời gian | Cố vấn dịch vụ đọc mô tả lỗi xe điện, ảnh và video khách gửi và log app để phân loại lỗi pin/ADAS/điện trước khi đặt lịch sửa chữa; mất khoảng 15-20 phút/case. |
+| 2 | **Xanh SM (GSM)** | Stakeholder Pain | Tài xế phản ánh điểm đón, trả trên bản đồ không khớp thực tế; điều phối viên phải gọi lại khách, hỏi mốc địa lý và chỉnh thủ công trong giờ cao điểm. |
+| 3 | **Vinhomes** | AI-upgrade | Trợ lý cư dân ảo hỗ trợ tra cứu quy định và draft hồ sơ đăng ký thi công nội thất mà không cần hỏi trực tiếp ban quản lý nhiều lần. |
+| 4 | **Vinmec** | Tốn thời gian | Bác sĩ hoặc điều dưỡng phải tổng hợp kết quả xét nghiệm, chẩn đoán, thuốc và dặn dò để viết tóm tắt ra viện hoặc tái khám sau mỗi ca khám. |
+| 5 | **Vinpearl / VinWonders** | Lặp lại | Nhân viên CSKH xử lý yêu cầu đổi ngày vé, phòng, combo do thời tiết hoặc lịch bay bằng cách kiểm tra nhiều hệ thống rồi soạn phản hồi gần giống nhau. |
 
 ## Phase 2 — QUICK-ASSESS
 
-Chọn top 3 từ danh sách SCAN: **#3 (Vinhomes phân loại ticket cư dân), #4 (Vinmec tóm tắt hồ sơ ra viện/tái khám), #1 (VinFast triage lỗi xe điện trước lịch sửa chữa).**
+Chọn top 3 từ danh sách SCAN: **#3 (Vinhomes trợ lý đăng ký thi công nội thất), #4 (Vinmec tóm tắt hồ sơ ra viện/tái khám), #1 (VinFast triage lỗi xe điện trước lịch sửa chữa).**
 
-## Quick Problem Card #1 — Vinhomes phân loại và route ticket cư dân
+## Quick Problem Card #1 — Vinhomes trợ lý đăng ký thi công nội thất
 
 | Trường | Nội dung |
 |---|---|
-| **Bài toán (1 câu)** | Ticket cư dân gửi qua App Vinhomes Resident cần được phân loại, xác định mức ưu tiên, route đúng bộ phận và có phản hồi đầu tiên nhanh hơn. |
+| **Bài toán (1 câu)** | Cư dân Vinhomes cần trợ lý ảo tra cứu thủ tục, hỏi thông tin còn thiếu và draft hồ sơ đăng ký thi công nội thất nhanh hơn. |
 | **Công ty thành viên** | [ ] VinFast  [ ] Xanh SM  [x] Vinhomes  [ ] Vinmec  [ ] Khác |
-| **Ai đang đau (Actor)?** | Nhân viên CSKH/Ban quản lý tòa nhà bị quá tải khi đọc ticket tự do; cư dân chờ phản hồi lâu và phải nhắc lại nhiều lần. |
-| **Workflow thủ công hiện tại** | 1. Cư dân gửi mô tả + ảnh/video trên app -> 2. CSKH đọc nội dung và đoán nhóm vấn đề -> 3. Tra cứu quy định/SLA hoặc lịch đội kỹ thuật -> 4. Gán ticket cho kỹ thuật, an ninh, vệ sinh, kế toán phí -> 5. Soạn phản hồi đầu tiên cho cư dân. |
-| **Bước tốn thời gian/lỗi nhất** | Bước 2-4: đọc hiểu ticket, phân loại đúng bộ phận và tìm SLA phù hợp (10-12 phút/ticket, dễ route sai khi ticket có nhiều ý). |
-| **AI hỗ trợ ở bước nào?** | AI tóm tắt ticket, phân loại intent, nhận diện mức khẩn cấp, đề xuất bộ phận xử lý và draft phản hồi đầu tiên; nhân viên CSKH bấm duyệt trước khi gửi. |
-| **Metric có số** | Giảm thời gian xử lý phản hồi đầu tiên từ 12 phút xuống dưới 2 phút/ticket; >=90% ticket được phân loại đúng ngay lần đầu; 95% ticket thường có phản hồi đầu tiên dưới 30 phút. |
+| **Ai đang đau (Actor)?** | Cư dân phải hỏi đi hỏi lại về giấy tờ và quy định thi công; nhân viên ban quản lý, CSKH phải trả lời lặp lại và kiểm tra hồ sơ thiếu thông tin. |
+| **Workflow thủ công hiện tại** | 1. Cư dân nhắn/gọi hỏi thủ tục -> 2. Ban quản lý tra quy định nội bộ -> 3. Giải thích giấy tờ cần chuẩn bị -> 4. Cư dân chuẩn bị hồ sơ và nộp lại -> 5. Ban quản lý kiểm tra hồ sơ, yêu cầu bổ sung nếu thiếu. |
+| **Bước tốn thời gian/lỗi nhất** | Bước 3 và 5: cá nhân hóa checklist và kiểm tra hồ sơ thiếu/sai thông tin (18 phút/hồ sơ, dễ phải bổ sung nhiều lần). |
+| **AI hỗ trợ ở bước nào?** | AI tra cứu knowledge base quy định thi công, hỏi thông tin còn thiếu, tạo checklist cá nhân hóa, draft form/hướng dẫn; ban quản lý duyệt trước khi gửi kết quả cuối. |
+| **Metric có số** | Giảm thời gian hướng dẫn + kiểm tra hồ sơ từ 25 phút xuống dưới 5 phút/hồ sơ; tăng tỉ lệ hồ sơ đủ thông tin ngay lần đầu từ 55% lên >=85%; giảm lượt hỏi lại/bổ sung ít nhất 40%. |
 | **Quick Architecture** | [ ] No AI  [ ] Rule  [x] LLM  [ ] Agent |
 
 ## Quick Problem Card #2 — Vinmec tạo nháp tóm tắt ra viện/tái khám
