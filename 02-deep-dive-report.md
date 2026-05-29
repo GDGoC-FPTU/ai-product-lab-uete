@@ -139,3 +139,56 @@ Nếu AI gặp một trong các tình huống sau, hệ thống phải chuyển 
 - Cư dân yêu cầu cam kết ngày được phê duyệt hoặc yêu cầu bỏ qua một giấy tờ bắt buộc.
 - Tài liệu quy định không có thông tin phù hợp.
 - AI confidence thấp hoặc phát hiện thiếu thông tin quan trọng như mã căn hộ, loại thi công, thời gian thi công dự kiến.
+
+---
+
+# 🏁 Phase 5 — EVALUATE (Nhóm)
+
+## AI Readiness Checklist
+
+1. [x] **Chúng tôi có sẵn dữ liệu mẫu/logs sạch để test?**
+
+   **Đánh giá:** Có thể bắt đầu ở mức prototype hẹp, nhưng chưa đủ để production.
+
+   Nhóm có thể tạo dữ liệu mẫu từ các câu hỏi thường gặp của cư dân về đăng ký thi công nội thất, checklist giấy tờ, nội quy thi công và các case hồ sơ thiếu thông tin. Tuy nhiên, trước khi triển khai thật, Vinhomes cần chuẩn hóa bộ tài liệu quy định đã duyệt theo từng khu/tòa và thu thập log câu hỏi thực tế để đo baseline.
+
+2. [x] **Rủi ro khi AI sai có nằm trong tầm kiểm soát qua HITL hoặc Fallback?**
+
+   **Đánh giá:** Có, nếu bắt buộc Human-in-the-loop.
+
+   AI chỉ được tạo checklist và phản hồi nháp. Các tình huống nhạy cảm như phí/phạt, tranh chấp, yêu cầu bỏ qua giấy tờ, hoặc cam kết ngày duyệt đều phải chuyển cho nhân viên BQL. AI không được tự phê duyệt hồ sơ và không được tự gửi quyết định chính thức cho cư dân.
+
+3. [x] **Stakeholders sẵn sàng thay đổi quy trình làm việc cũ?**
+
+   **Đánh giá:** Có thể chấp nhận nếu triển khai như công cụ hỗ trợ, không thay thế nhân viên.
+
+   Cư dân được lợi vì nhận checklist nhanh hơn, còn nhân viên BQL giảm thời gian trả lời các câu hỏi lặp lại. Tuy nhiên cần training ngắn để BQL biết cách kiểm tra draft, sửa phản hồi và đánh dấu các câu trả lời sai để cải thiện hệ thống.
+
+## Quyết định cuối cùng của Ban Giám Đốc Vin Smart Future
+
+- [x] **GO (Bắt đầu xây dựng Prototype):** Bắt đầu phát triển với scope hẹp.
+- [ ] **NOT YET (Cần tích lũy thêm dữ liệu/xác lập baseline):** Trì hoãn để chuẩn bị thêm.
+- [ ] **NO-GO (Không khả thi / Rule-based tốt hơn):** Hủy bỏ dự án AI này.
+
+## Justification (Lý giải quyết định dựa trên bằng chứng kỹ thuật và chi phí)
+
+Nhóm quyết định **GO** với phạm vi hẹp: **trợ lý cư dân ảo hỗ trợ thủ tục đăng ký thi công nội thất tại Vinhomes**.
+
+Lý do chính:
+
+1. **Bài toán có bottleneck rõ ràng:** nhân viên BQL đang mất khoảng 10-15 phút cho mỗi lượt hỏi để tra cứu quy định, giải thích giấy tờ và kiểm tra hồ sơ thiếu/sai. Nếu có khoảng 30 lượt hỏi/ngày, thời gian vận hành có thể lên tới khoảng 6 giờ/ngày.
+
+2. **LLM có giá trị hơn rule thuần ở phần ngôn ngữ tự nhiên:** cư dân thường mô tả nhu cầu bằng tiếng Việt tự do, không theo biểu mẫu cố định. LLM phù hợp để tóm tắt nhu cầu, hỏi lại thông tin thiếu và diễn giải checklist thành câu trả lời dễ hiểu. Phần checklist giấy tờ vẫn nên kết hợp rule-based để đảm bảo tính nhất quán.
+
+3. **Rủi ro được kiểm soát bằng boundary:** AI không được tự phê duyệt hồ sơ, không cam kết ngày duyệt, không bỏ qua giấy tờ, không xử lý tranh chấp/phí/phạt. Mọi phản hồi chính thức đều cần nhân viên BQL duyệt trước khi gửi.
+
+4. **Chi phí prototype thấp:** giai đoạn đầu chỉ cần bộ FAQ/quy định đã duyệt, khoảng 20-50 câu hỏi mẫu, prompt prototype, và giao diện nội bộ đơn giản cho BQL review draft. Chưa cần xây agent tự trị hoặc tích hợp sâu vào hệ thống cư dân.
+
+5. **Metric kiểm chứng được:** prototype có thể đo bằng thời gian xử lý trung bình, tỷ lệ hồ sơ phải bổ sung, tỷ lệ draft được BQL chấp nhận và số case phải fallback. Nếu không đạt các ngưỡng như giảm thời gian xử lý từ 12 phút xuống dưới 3 phút hoặc tỷ lệ draft chấp nhận dưới 80%, nhóm sẽ quay lại cải thiện dữ liệu/rule trước khi mở rộng.
+
+## Điều kiện để tiếp tục sau Prototype
+
+- Chuẩn hóa tài liệu quy định theo từng khu/tòa trước khi đưa vào retrieval.
+- Thu thập dữ liệu thật về số lượt hỏi, thời gian xử lý và tỷ lệ hồ sơ thiếu để xác lập baseline.
+- Thiết lập logging cho các trường hợp AI bị BQL sửa nhiều hoặc bị fallback.
+- Chỉ mở rộng sang thủ tục khác như vé gửi xe tháng sau khi thủ tục thi công nội thất đạt metric tối thiểu trong pilot.
