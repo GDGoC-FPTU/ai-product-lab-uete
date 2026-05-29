@@ -2,8 +2,12 @@
 
 ## Thông tin nhóm
 
-- **Tên nhóm:** Uete
-- **Thành viên:** _Điền họ tên và MSSV các thành viên tại đây_
+- **Tên nhóm:** UETE
+- **Thành viên:**
+  - Trần Trung Kiên — 2a202600850
+  - Lê Văn Khoa — 2a202600603
+  - Lê Quang Hưng — 2a202600891
+  - Nguyễn Văn Duy — 2a202600725
 
 ---
 
